@@ -2,14 +2,21 @@ SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
 
 FPS = 60
-MOVE_SPEED = 5
+MOVE_SPEED = 2
 TILE_SIZE = 32
+
+ENEMY_SPEED= 2
 
 # Layers
 
-PLAYER_LAYER = 2
-TILE_MAP_LAYER = 1
+PLAYER_LAYER = 4
+ENEMY_LAYER = 3
+WALL_LAYER = 2
+GROUND_LAYER = 1
 
+# Safe Areas
+X_SAFEAREA = 3
+Y_SAFEAREA = 2
 
 # Colors
 RED = (255, 0, 0)
@@ -25,11 +32,11 @@ TILE_MAP = [
   'W....W......W......W',
   'W....W...p..W......W',
   'W....WWWWWWWW......W',
-  'W..................W',
+  'W...............E..W',
   'W...........W......W',
   'W...........W......W',
   'W...........W......W',
-  'W...........W......W',
+  'W...E.......W......W',
   'W...........W......W',
   'W...........W......W',
   'W...........W......W',

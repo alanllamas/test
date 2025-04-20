@@ -9,10 +9,17 @@ class Game:
         pygame.display.set_caption("Test Game")
         self.clock = pygame.time.Clock()
         self.running = True
+        self.playing = False
+        self.character_spritesheet = Spritesheet('assets/character.png')
+        self.terrain_spritesheet = Spritesheet('assets/terrain.png')
+        self.enemy_spritesheet = Spritesheet('assets/enemy.png')
 
     def createTileMap(self):
         for y, row in enumerate(TILE_MAP):
             for x, tile in enumerate(row):
+                Ground(self, x, y)
+                if tile == 'E':
+                    Enemy(self, x, y)
                 if tile == 'W':
                     Wall(self, x, y)
                 if tile == 'p':
