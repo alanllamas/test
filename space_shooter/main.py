@@ -12,9 +12,13 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 PLAYER_SPEED = 400
-LASER_SPEED = 400
+LASER_SPEED = 500
 PLAYER_LAYER = 1
 BG_LAYER = 0
+LASER_POWER = 20
+METEOR_LIFE = 100
+PLAYER_LIFE = 300
+METEOR_POWER = 100
 # Sprites
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups):
@@ -26,9 +30,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = SCREEN_HEIGHT - self.rect.height - 10
         self.speed = PLAYER_SPEED
         self.direction = pygame.Vector2()
-        self.shoot_cooldown = 100
+        self.shoot_cooldown = 200
         self.can_shoot = True
         self.shoot_time = 0
+        self.life = PLAYER_LIFE
 
     def update(self):
         self.move()
@@ -65,9 +70,15 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_SPACE] and self.can_shoot:
             self.can_shoot = False
             self.shoot_time = pygame.time.get_ticks()
-            laser = Laser(all_sprites)
-            laser.rect.center = self.rect.center
-            laser.rect.y -= self.rect.height
+            laser_a = Laser(all_sprites)
+            laser_a.rect.center = self.rect.center
+            laser_a.rect.x += 10
+            laser_a.rect.y -= self.rect.height
+            laser_b = Laser(all_sprites)
+            laser_b.rect.center = self.rect.center
+            laser_b.rect.y -= self.rect.height
+            laser_b.rect.x -= 10
+
             # return laser
 
 class Star(pygame.sprite.Sprite):
@@ -98,6 +109,8 @@ class Meteor(pygame.sprite.Sprite):
         self.rect.y = -self.rect.height
         self.speed = random.randint(400, 500)
         self.direction = pygame.Vector2(random.uniform(-0.5, 0.5), 1)
+        self.life = METEOR_LIFE
+        self.damage = METEOR_POWER
     
     def update(self):
         self.move()
@@ -106,6 +119,7 @@ class Meteor(pygame.sprite.Sprite):
         self.rect.center += self.direction * self.speed * dt
         if self.rect.y > SCREEN_HEIGHT:
             self.kill()
+
 class Laser(pygame.sprite.Sprite):
     def __init__(self, groups):
         super().__init__((groups, laser_sprites))
@@ -113,6 +127,7 @@ class Laser(pygame.sprite.Sprite):
         self.image = pygame.image.load("assets/laser.png").convert_alpha()
         self.rect = self.image.get_frect()
         self.speed = LASER_SPEED
+        self.damage = LASER_POWER
     
     def update(self):
         self.move()
@@ -150,7 +165,32 @@ pygame.time.set_timer(create_meteor_event, 750)
 create_star_event = pygame.event.custom_type()
 pygame.time.set_timer(create_star_event, 400)
 
+# collitions
+def collitions():
+    global running
+    # Check for collisions between lasers and meteors
+    for laser in laser_sprites:
+        meteor_hit = pygame.sprite.spritecollide(laser, meteor_sprites, False)
+        if meteor_hit:
+            laser.kill()
+            for meteor in meteor_hit:
+                # meteor.take_damage(laser.damage)
+                meteor.life -= laser.damage
+                if meteor.life <= 0:
+                    meteor.kill()
+                # meteor.take_damage(10)
+                # Add explosion effect here if needed
 
+    # Check for collisions between player and meteors
+    meteor_hit_player = pygame.sprite.spritecollide(player, meteor_sprites, False)
+    if meteor_hit_player:
+        for meteor in meteor_hit_player:
+          player.life -= meteor.damage
+          meteor.kill()
+          if player.life <= 0:
+              player.kill()
+              running = False
+        # Add game over logic here
 # Game loop
 while running:
     dt = clock.tick(FPS) / 1000
@@ -168,14 +208,7 @@ while running:
 
     # Update game state
     all_sprites.update()
-    meteor_player_collition_sprites = pygame.sprite.groupcollide(meteor_sprites, player_sprites, False, False)
-    meteor_laser_collition_sprites = pygame.sprite.groupcollide(meteor_sprites, laser_sprites, True, True)
-
-    if meteor_player_collition_sprites:
-        for meteor in meteor_player_collition_sprites:
-            meteor.kill()
-            player.kill()
-            running = False
+    collitions()
 
 
     #draw game state
