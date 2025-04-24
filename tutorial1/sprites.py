@@ -53,23 +53,23 @@ class Player(pygame.sprite.Sprite):
     def move (self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            # for sprite in self.game.all_sprites:
-            #     sprite.rect.x += MOVE_SPEED
+            for sprite in self.game.all_sprites:
+                sprite.rect.x += MOVE_SPEED
             self.x_change -= MOVE_SPEED
             self.facing = "left"
         if keys[pygame.K_RIGHT]:
-            # for sprite in self.game.all_sprites:
-            #     sprite.rect.x -= MOVE_SPEED
+            for sprite in self.game.all_sprites:
+                sprite.rect.x -= MOVE_SPEED
             self.x_change += MOVE_SPEED
             self.facing = "right"
         if keys[pygame.K_UP]:
-            # for sprite in self.game.all_sprites:
-            #     sprite.rect.y += MOVE_SPEED
+            for sprite in self.game.all_sprites:
+                sprite.rect.y += MOVE_SPEED
             self.y_change -= MOVE_SPEED
             self.facing = "up"
         if keys[pygame.K_DOWN]:
-            # for sprite in self.game.all_sprites:
-            #     sprite.rect.y -= MOVE_SPEED
+            for sprite in self.game.all_sprites:
+                sprite.rect.y -= MOVE_SPEED
             self.y_change += MOVE_SPEED
             self.facing = "down"
 
@@ -278,3 +278,77 @@ class Button:
                 return True
             return False
         return False
+
+class Attack(pygame.sprite.Sprite):
+    def __init__(self, game, x, y):
+        super().__init__()
+        self.game = game
+        self._layer = PLAYER_LAYER
+        self.groups = self.game.all_sprites, self.game.attacks
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        
+        self.x = x
+        self.y = y
+        self.width = TILE_SIZE
+        self.height = TILE_SIZE
+
+        self.image = self.game.attack_spritesheet.get_sprite(0, 0, self.width, self.height)
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.animation_loop = 0
+
+    def update(self):
+        self.animate()
+        self.collide_enemy()
+
+    def collide_enemy(self):
+        hits = pygame.sprite.spritecollide(self, self.game.enemies, True)
+        if hits:
+            self.kill()
+            
+    def animate(self):
+        right_animations = [self.game.attack_spritesheet.get_sprite(0, 64, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(32, 64, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(64, 64, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(96, 64, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(128, 64, self.width, self.height)]
+
+        down_animations = [self.game.attack_spritesheet.get_sprite(0, 32, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(32, 32, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(64, 32, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(96, 32, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(128, 32, self.width, self.height)]
+
+        left_animations = [self.game.attack_spritesheet.get_sprite(0, 96, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(32, 96, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(64, 96, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(96, 96, self.width, self.height),
+                           self.game.attack_spritesheet.get_sprite(128, 96, self.width, self.height)]
+
+        up_animations = [self.game.attack_spritesheet.get_sprite(0, 0, self.width, self.height),
+                         self.game.attack_spritesheet.get_sprite(32, 0, self.width, self.height),
+                         self.game.attack_spritesheet.get_sprite(64, 0, self.width, self.height),
+                         self.game.attack_spritesheet.get_sprite(96, 0, self.width, self.height),
+                         self.game.attack_spritesheet.get_sprite(128, 0, self.width, self.height)]
+        
+        if self.game.player.facing == "down":
+            self.image = down_animations[math.floor(self.animation_loop)]
+            self.animation_loop += 0.5
+            if self.animation_loop >= len(down_animations):
+                self.kill()
+        if self.game.player.facing == "up":
+            self.image = up_animations[math.floor(self.animation_loop)]
+            self.animation_loop += 0.5
+            if self.animation_loop >= len(up_animations):
+                self.kill()
+        if self.game.player.facing == "left":
+            self.image = left_animations[math.floor(self.animation_loop)]
+            self.animation_loop += 0.5
+            if self.animation_loop >= len(left_animations):
+                self.kill()
+        if self.game.player.facing == "right":
+            self.image = right_animations[math.floor(self.animation_loop)]
+            self.animation_loop += 0.5
+            if self.animation_loop >= len(right_animations):
+                self.kill()

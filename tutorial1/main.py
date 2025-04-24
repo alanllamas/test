@@ -13,20 +13,21 @@ class Game:
         self.character_spritesheet = Spritesheet('assets/character.png')
         self.terrain_spritesheet = Spritesheet('assets/terrain.png')
         self.enemy_spritesheet = Spritesheet('assets/enemy.png')
+        self.attack_spritesheet = Spritesheet('assets/attack.png')
         self.font = pygame.font.Font("arial.ttf", 32)
         self.intro_background = pygame.image.load("assets/introbackground.png")
         self.gameover_background = pygame.image.load("assets/gameover.png")
 
-    def createTileMap(self):
-        for y, row in enumerate(TILE_MAP):
+    def createTileMap(self, map, x_index=0, y_index=0):
+        for y, row in enumerate(map):
             for x, tile in enumerate(row):
-                Ground(self, x, y)
+                Ground(self, x + (x_index * 20), y + (y_index * 15))
                 if tile == 'E':
-                    Enemy(self, x, y)
+                    Enemy(self, x + (x_index * 20), y + (y_index * 15))
                 if tile == 'W':
-                    Wall(self, x, y)
+                    Wall(self, x + (x_index * 20), y + (y_index * 15))
                 if tile == 'p':
-                    self.player = Player(self, x, y)
+                    self.player = Player(self, x + (x_index * 20), y + (y_index * 15))
                     self.player.move()
     def new(self):
         self.playing = True
@@ -34,7 +35,11 @@ class Game:
         self.blocks = pygame.sprite.LayeredUpdates()
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()
-        self.createTileMap()
+        
+        for y, tile_rows in enumerate(TILE_MAPS):
+            for x, tile in enumerate(tile_rows):
+                self.createTileMap(tile, x, y)
+        # self.createTileMap(TILE_MAP_B,1, 0)
         
     def update(self):
         self.all_sprites.update()
@@ -44,6 +49,16 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
                 self.playing = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    if self.player.facing == "right":
+                        self.player.attack = Attack(self, self.player.rect.x + TILE_SIZE, self.player.rect.y)
+                    if self.player.facing == "left":
+                        self.player.attack = Attack(self, self.player.rect.x - TILE_SIZE, self.player.rect.y)
+                    if self.player.facing == "up":    
+                        self.player.attack = Attack(self, self.player.rect.x, self.player.rect.y - TILE_SIZE)
+                    if self.player.facing == "down":
+                        self.player.attack = Attack(self, self.player.rect.x, self.player.rect.y + TILE_SIZE)
 
     def draw(self):
         self.screen.fill(BLACK)
