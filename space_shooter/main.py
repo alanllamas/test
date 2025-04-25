@@ -87,11 +87,11 @@ class Star(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = pygame.image.load("assets/star.png").convert_alpha()
         self.rect = self.image.get_frect()
-        self.rect.x = random.randint(0, SCREEN_WIDTH - self.rect.width)
+        self.rect.x = random.randint(0, int(SCREEN_WIDTH - self.rect.width))
         if y is None: 
             y = -self.rect.height
         else:
-            y = random.randint(0, SCREEN_HEIGHT - self.rect.height) 
+            y = random.randint(0, int(SCREEN_HEIGHT - self.rect.height)) 
         self.rect.y = y
     
     def update(self):
@@ -105,7 +105,7 @@ class Meteor(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = pygame.image.load("assets/meteor.png").convert_alpha()
         self.rect = self.image.get_frect()
-        self.rect.x = random.randint(0, SCREEN_WIDTH - self.rect.width)
+        self.rect.x = random.randint(0, int(SCREEN_WIDTH - self.rect.width))
         self.rect.y = -self.rect.height
         self.speed = random.randint(400, 500)
         self.direction = pygame.Vector2(random.uniform(-0.5, 0.5), 1)
