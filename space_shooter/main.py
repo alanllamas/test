@@ -129,7 +129,8 @@ class Meteor(pygame.sprite.Sprite):
     def  __init__(self, groups):
         self._layer = PLAYER_LAYER     
         super().__init__(groups)
-        self.image = pygame.image.load("assets/meteor.png").convert_alpha()
+        self.default_image = pygame.image.load("assets/meteor.png").convert_alpha()
+        self.image = self.default_image
         self.rect = self.image.get_frect()
         self.rect.x = random.randint(0, int(SCREEN_WIDTH - self.rect.width))
         self.rect.y = -self.rect.height
@@ -137,12 +138,16 @@ class Meteor(pygame.sprite.Sprite):
         self.direction = pygame.Vector2(random.uniform(-0.5, 0.5), 1)
         self.life = METEOR_LIFE
         self.damage = METEOR_POWER
+        self.rotation = 0
     
     def update(self):
         self.move()
     
     def move(self):
         self.rect.center += self.direction * self.speed * dt
+        self.rotation += 50 * dt
+        self.image = pygame.transform.rotate(self.default_image, self.rotation)
+
         if self.rect.y > SCREEN_HEIGHT:
             self.kill()
 
@@ -218,7 +223,7 @@ def collitions():
     global running
     # Check for collisions between lasers and meteors
     for laser in laser_sprites:
-        meteor_hit = pygame.sprite.spritecollide(laser, meteor_sprites, False)
+        meteor_hit = pygame.sprite.spritecollide(laser, meteor_sprites, False, pygame.sprite.collide_mask)
         if meteor_hit:
             laser.kill()
             for meteor in meteor_hit:
@@ -230,7 +235,7 @@ def collitions():
                 # Add explosion effect here if needed
 
     # Check for collisions between player and meteors
-    meteor_hit_player = pygame.sprite.spritecollide(player, meteor_sprites, False)
+    meteor_hit_player = pygame.sprite.spritecollide(player, meteor_sprites, False, pygame.sprite.collide_mask)
     if meteor_hit_player:
         for meteor in meteor_hit_player:
           player.life -= meteor.damage
