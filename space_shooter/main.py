@@ -134,12 +134,12 @@ class Meteor(pygame.sprite.Sprite):
         self.rect = self.image.get_frect()
         self.rect.x = random.randint(0, int(SCREEN_WIDTH - self.rect.width))
         self.rect.y = -self.rect.height
-        self.speed = random.randint(400, 500)
+        self.speed = random.randint(300, 500)
         self.direction = pygame.Vector2(random.uniform(-0.4, 0.4), 1)
         self.life = METEOR_LIFE
         self.damage = METEOR_POWER
         self.rotation = 0
-        self.rotation_ratio = random.randint(40, 50) * dt
+        self.rotation_ratio = random.randint(70, 100) * dt
         self.rotation_direction = 1
         if int(self.direction[0] + 1) < 1:
           self.rotation_direction *= -1
@@ -150,7 +150,8 @@ class Meteor(pygame.sprite.Sprite):
     def move(self):
         self.rect.center += self.direction * self.speed * dt
         self.rotation += self.rotation_ratio * self.rotation_direction
-        self.image = pygame.transform.rotate(self.default_image, self.rotation)
+        self.image = pygame.transform.rotozoom(self.default_image, self.rotation, 0.7)
+        self.rect = self.image.get_frect(center= self.rect.center)
 
         if self.rect.y > SCREEN_HEIGHT:
             self.kill()
