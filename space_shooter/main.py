@@ -3,7 +3,7 @@ import random
 
 # Variables
 
-SCREEN_WIDTH = 500
+SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 800
 FPS = 60
 WHITE = (255, 255, 255)
@@ -16,7 +16,7 @@ PLAYER_LAYER = 1
 BG_LAYER = 0
 PLAYER_SPEED = 400
 LASER_SPEED = 500
-LASER_POWER = 30
+LASER_POWER = 100
 METEOR_LIFE = 100
 PLAYER_LIFE = 300
 METEOR_POWER = 100
@@ -81,6 +81,9 @@ class Player(pygame.sprite.Sprite):
             laser_a.rect.center = self.rect.center
             # laser_a.rect.x += 10
             laser_a.rect.y -= self.rect.height
+            if laser_sound:
+                laser_sound.set_volume(0.2)
+                laser_sound.play()
             # laser_b = Laser(all_sprites)
             # laser_b.rect.center = self.rect.center
             # laser_b.rect.y -= self.rect.height
@@ -172,7 +175,25 @@ class Laser(pygame.sprite.Sprite):
         self.rect.y -= self.speed * dt
         if self.rect.y < 0:
             self.kill()
-    
+
+class LaserExplotion(pygame.sprite.Sprite):
+    def __init__(self, pos, groups):
+        super().__init__(groups)
+        self.frames = [
+            pygame.image.load(f'assets/explosion/{i}.png').convert_alpha()  for i in range(0, 21)
+        ]
+        self.frame_index = 0
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_frect(center = pos)
+
+    def update(self):
+        self.frame_index += 40 * dt
+        self.image = self.frames[int(self.frame_index) % len(self.frames)]
+        if int(self.frame_index) == len(self.frames):
+            self.kill()
+
+
+
 def display_score():
     score_surf = font.render(f"Score: {str(player.score)}" , True, (240,240,240))
     # box_surf = pygame.Surface(score_surf.get_rect().inflate(10, 10).size, pygame.SRCALPHA)
@@ -211,6 +232,24 @@ all_sprites = pygame.sprite.Group()
 player_sprites = pygame.sprite.Group()
 meteor_sprites = pygame.sprite.Group()
 laser_sprites = pygame.sprite.Group()
+# pygame.mixer.init()
+try:
+    pygame.mixer.init()
+    laser_sound = pygame.mixer.Sound('assets/audio/laser.wav')
+    explotion_sound = pygame.mixer.Sound('assets/audio/explosion.wav')
+    game_music = pygame.mixer.Sound('assets/audio/game_music.wav')
+    damage_sound = pygame.mixer.Sound('assets/audio/damage.ogg')
+except:
+    laser_sound = None
+    explotion_sound = None
+    game_music = None
+    damage_sound = None
+    print("No sound")
+
+if game_music:
+    game_music.set_volume(0.1)
+    game_music.play(-1)
+
 
 player = Player((all_sprites, player_sprites))
 stars = []
@@ -219,7 +258,7 @@ for y in range(0, 20):
 
 # Events
 create_meteor_event = pygame.event.custom_type()
-pygame.time.set_timer(create_meteor_event, 750)
+pygame.time.set_timer(create_meteor_event, 400)
 create_star_event = pygame.event.custom_type()
 pygame.time.set_timer(create_star_event, 400)
 
@@ -231,10 +270,14 @@ def collitions():
         meteor_hit = pygame.sprite.spritecollide(laser, meteor_sprites, False, pygame.sprite.collide_mask)
         if meteor_hit:
             laser.kill()
+            LaserExplotion(laser.rect.midtop, all_sprites)
             for meteor in meteor_hit:
                 # meteor.take_damage(laser.damage)
                 meteor.life -= laser.damage
                 if meteor.life <= 0:
+                    if explotion_sound:
+                        explotion_sound.set_volume(0.2)
+                        explotion_sound.play()
                     player.score += 1
                     meteor.kill()
                 # Add explosion effect here if needed
@@ -244,6 +287,9 @@ def collitions():
     if meteor_hit_player:
         for meteor in meteor_hit_player:
           player.life -= meteor.damage
+          if explotion_sound:
+              explotion_sound.set_volume(0.2)
+              explotion_sound.play()
           meteor.kill()
           if player.life <= 0:
               player.kill()
