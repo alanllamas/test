@@ -1,26 +1,45 @@
 import pygame
+from os import walk
 from os.path import join
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE, FPS, PLAYER_LAYER
 
 class Player(pygame.sprite.Sprite):
-  def __init__(self, groups, collition_sprites):
+  def __init__(self, pos, groups, collition_sprites):
     super().__init__(groups)
+    self.state = 'down'
+    self.frame_index = 0
+    self.load_images()
     self._layer = PLAYER_LAYER
-    self.right_frames = [pygame.image.load(join("assets","images", "player", "right", f"{i}.png")).convert_alpha() for i in range(4)]
-    self.left_frames = [pygame.image.load(join("assets","images", "player", "left", f"{i}.png")).convert_alpha() for i in range(4)]
-    self.up_frames = [pygame.image.load(join("assets","images", "player", "up", f"{i}.png")).convert_alpha() for i in range(4)]
-    self.down_frames = [pygame.image.load(join("assets","images", "player", "down", f"{i}.png")).convert_alpha() for i in range(4)]
-    self.image = self.down_frames[0]
-    self.rect = self.image.get_frect(center=(int(SCREEN_WIDTH / 2), int(SCREEN_HEIGHT / 2)))
-    self.hit_box = self.rect.inflate(-40, 0)
+    self.rect = self.image.get_frect(center=pos)
+    self.hit_box = self.rect.inflate(-50, -80)
     self.speed = 0.5
     self.direction = pygame.Vector2()
     self.collition_sprites = collition_sprites
 
+  def load_images(self):
+    self.frames = {
+      'right': [],
+      'left': [],
+      'up': [],
+      'down': []
+    }
+    # pygame.image.load(join("assets","images", "player", "right", f"{i}.png")).convert_alpha() for i in range(4)
+    # pygame.image.load(join("assets","images", "player", "left", f"{i}.png")).convert_alpha() for i in range(4)
+    # pygame.image.load(join("assets","images", "player", "up", f"{i}.png")).convert_alpha() for i in range(4)
+    # pygame.image.load(join("assets","images", "player", "down", f"{i}.png")).convert_alpha() for i in range(4)
+    for state in self.frames.keys():
+      for path, folders, files in walk(join("assets", "images", "player", state)):
+        if files:
+          for file in sorted(files, key=lambda x: int(x.split(".")[0])):
+            full_path = join(path, file)
+            self.frames[state].append(pygame.image.load(full_path).convert_alpha())
+    self.image = self.frames[self.state][self.frame_index]
+    print(self.frames)
   def update(self, dt):
     self.move(dt)
 
   def move(self, dt):
+    self.animate(dt)
     keys = pygame.key.get_pressed()
 
     self.direction.x = int(keys[pygame.K_RIGHT] - keys[pygame.K_LEFT])
@@ -33,6 +52,30 @@ class Player(pygame.sprite.Sprite):
 
     self.rect.center = self.hit_box.center
     # if self.direction.x > 0:
+
+  def animate(self, dt):
+    # get state
+    if self.direction.x != 0 or self.direction.y != 0:
+      if self.direction.x != 0:
+        if self.direction.x > 0:
+          self.state = "right"
+        else:
+          self.state = "left"
+      elif self.direction.y != 0:
+        if self.direction.y > 0:
+          self.state = "down"
+        else:
+          self.state = "up"
+      self.run_animation(dt)
+    else:
+      self.image = self.frames[self.state][0]
+
+   
+    
+
+  def run_animation(self, dt):
+    self.frame_index += 0.5 * dt
+    self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
 
   def collition(self, direction):
     for sprite in self.collition_sprites:

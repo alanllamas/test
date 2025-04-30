@@ -3,6 +3,7 @@ import pygame
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE, FPS
 from player import Player
 from sprites import *
+from groups import *
 from random import randint
 from pytmx.util_pygame import load_pygame
 
@@ -14,7 +15,7 @@ class Game:
     pygame.display.set_caption("Vampire Survivor")
     self.clock = pygame.time.Clock()
     self.running = True
-    self.all_sprites = pygame.sprite.Group()
+    self.all_sprites = AllSprites()
     self.collition_sprites = pygame.sprite.Group()
     self.setup()
 
@@ -28,13 +29,17 @@ class Game:
       CollitionSprite((self.all_sprites, self.collition_sprites), (sprite.x, sprite.y), sprite.image)
 
     for sprite in map.get_layer_by_name("Collisions"):
-      print(sprite)
+      # print(sprite)
       surf = pygame.surface.Surface((sprite.width, sprite.height))
       surf.fill("black")
       surf.set_colorkey("black")
       CollitionSprite(self.collition_sprites, (sprite.x, sprite.y ), surf)
 
-    self.player = Player(self.all_sprites, self.collition_sprites)
+    for sprite in map.get_layer_by_name("Entities"):
+      if sprite.name == "Player":
+        self.player = Player( (sprite.x, sprite.y), self.all_sprites, self.collition_sprites)
+        # self.player.image = sprite.image
+        self.player.rect = self.player.image.get_frect(center=(sprite.x, sprite.y))
 
 
   def run(self):
@@ -48,7 +53,7 @@ class Game:
 
       self.all_sprites.update(dt)
       # self.screen.blit(self.player.image, self.player.rect)
-      self.all_sprites.draw(self.screen)
+      self.all_sprites.draw_camera(self.player.rect.center)
       pygame.display.flip()
       # pygame.display.update()
 
