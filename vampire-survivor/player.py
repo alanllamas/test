@@ -42,9 +42,9 @@ class Player(pygame.sprite.Sprite):
     self.animate(dt)
     keys = pygame.key.get_pressed()
 
-    self.direction.x = int(keys[pygame.K_RIGHT] - keys[pygame.K_LEFT])
+    self.direction.x = int(int(keys[pygame.K_RIGHT] or keys[pygame.K_d]) - int(keys[pygame.K_LEFT] or keys[pygame.K_a]))
     self.collition("horizontal")
-    self.direction.y = int(keys[pygame.K_DOWN] - keys[pygame.K_UP])
+    self.direction.y = int(int(keys[pygame.K_DOWN] or keys[pygame.K_s]) - int(keys[pygame.K_UP] or keys[pygame.K_w]))
     self.collition("vertical")
     self.direction = self.direction.normalize() if self.direction.magnitude() > 0 else pygame.Vector2()
     self.hit_box.move_ip(self.direction * self.speed * dt)

@@ -17,9 +17,12 @@ class Game:
     self.running = True
     self.all_sprites = AllSprites()
     self.collition_sprites = pygame.sprite.Group()
+    self.bullet_sprites = pygame.sprite.Group()
     self.setup()
 
   def setup(self):
+    self.create_enemy_event = pygame.event.custom_type()
+    pygame.time.set_timer(self.create_enemy_event, 500)
     map = load_pygame(join("assets", "data", "maps", "world.tmx"))
 
     for x, y, image in map.get_layer_by_name("Ground").tiles():
@@ -40,6 +43,8 @@ class Game:
         self.player = Player( (sprite.x, sprite.y), self.all_sprites, self.collition_sprites)
         # self.player.image = sprite.image
         self.player.rect = self.player.image.get_frect(center=(sprite.x, sprite.y))
+        Gun(self.all_sprites, self.player, self.bullet_sprites)
+
 
 
   def run(self):
@@ -50,7 +55,11 @@ class Game:
       for event in pygame.event.get():
         if event.type == pygame.QUIT:
           self.running = False
-
+        if event.type == self.create_enemy_event:
+          x = randint(0, SCREEN_WIDTH)
+          y = randint(0, SCREEN_HEIGHT)
+          Enemy((self.all_sprites, self.collition_sprites), self.player)
+          print('created enemy')
       self.all_sprites.update(dt)
       # self.screen.blit(self.player.image, self.player.rect)
       self.all_sprites.draw_camera(self.player.rect.center)
