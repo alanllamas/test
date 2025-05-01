@@ -34,7 +34,7 @@ class Player(pygame.sprite.Sprite):
             full_path = join(path, file)
             self.frames[state].append(pygame.image.load(full_path).convert_alpha())
     self.image = self.frames[self.state][self.frame_index]
-    print(self.frames)
+    # print(self.frames)
   def update(self, dt):
     self.move(dt)
 
