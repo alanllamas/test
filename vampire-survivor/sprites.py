@@ -88,39 +88,34 @@ class Enemy(pygame.sprite.Sprite):
         self.player_offset = pygame.Vector2(random.randint(-300, 300),random.randint(-300, 300))
         self.rect = self.image.get_frect(center=player.rect.center + self.player_offset + self.random_position)
         self._layer = PLAYER_LAYER
-        self.speed = 1.5
+        self.speed = 1
         self.player = player
         self.direction = (pygame.Vector2(self.player.rect.center) - pygame.Vector2(self.rect.center)) 
         self.collition_sprites = collition_sprites
         self.enemies = ['bat', 'blob', 'skeleton']
         self.enemy = random.choice(self.enemies)
-        # self.enemy = 'bat'
         self.frame_index = 0
         self.load_images()
-    # def get_direction(self):
 
-        # self.direction = ( (player_pos )).normalize()
-        # self.direction = self.direction.normalize()
     def update(self, dt):
         self.direction = (pygame.Vector2(self.player.rect.center) - pygame.Vector2(self.rect.center)) 
         self.rect.center += self.direction * self.speed * dt / 1000
         self.collition()
         self.run_animation(dt)
-        # print(self.direction)
 
     def collition(self):
-        for sprite in self.collition_sprites:
-            if sprite.rect.colliderect(self.rect):
-                if self.direction[0] != 0:
-                    if self.direction.x > 0:
-                        self.rect.right = sprite.rect.left
-                    if self.direction.x < 0:
-                        self.rect.left = sprite.rect.right
-                if self.direction[0] != 0:
-                    if self.direction.y > 0:
-                        self.rect.bottom = sprite.rect.top
-                    if self.direction.y < 0:
-                        self.rect.top = sprite.rect.bottom
+      for sprite in self.collition_sprites:
+        if sprite.rect.colliderect(self.rect):
+          if self.direction[0] != 0:
+            if self.direction.x > 0:
+              self.rect.right = sprite.rect.left
+            if self.direction.x < 0:
+              self.rect.left = sprite.rect.right
+          if self.direction[0] != 0:
+            if self.direction.y > 0:
+              self.rect.bottom = sprite.rect.top
+            if self.direction.y < 0:
+              self.rect.top = sprite.rect.bottom
     
     def load_images(self):
       self.frames = {
