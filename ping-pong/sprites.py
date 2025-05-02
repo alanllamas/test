@@ -28,21 +28,28 @@ class Paddle(pygame.sprite.Sprite):
             self.rect.top = 0
         if self.rect.bottom > SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
+    
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, pos, groups):
+    def __init__(self, pos, groups, paddle_sprites):
         super().__init__(groups)
         self.image = pygame.Surface((BALL_RADIUS * 2, BALL_RADIUS * 2))
-        self.image.fill(COLORS['ball'])  # White color
+        pygame.draw.circle(self.image, COLORS['ball'], (BALL_RADIUS, BALL_RADIUS), BALL_RADIUS)
+        self.image.set_colorkey((0,0,0))
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.speed_x = BALL_SPEED_X
         self.speed_y = BALL_SPEED_Y
+        self.direction = pygame.Vector2(0, 0)
         self.collided = pygame.Vector2()
+        self.paddle_sprites = paddle_sprites
+        self.old_rect = self.rect.copy()
 
     def update(self, dt):
+        self.old_rect = self.rect.copy()
         self.move(dt)
         self.collide_screen()
+        self.collide_paddle_ball()
         self.bounce()
 
     def move(self, dt):
@@ -61,9 +68,9 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
             self.collided.x = 1
-        # if self.rect.right > SCREEN_WIDTH:
-        #     self.rect.right = SCREEN_WIDTH
-        #     self.collided.x = 1
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+            self.collided.x = 1
     
     def bounce(self):
         if self.collided.x != 0:
@@ -72,3 +79,22 @@ class Ball(pygame.sprite.Sprite):
         if self.collided.y != 0:
           self.speed_y *= -1
           self.collided.y = 0
+    
+    # move collition to ball class and check for previous frame of bal for collition check in four sides
+    def collide_paddle_ball(self):
+      for paddle_sprite in self.paddle_sprites:
+        if pygame.sprite.spritecollide(self, self.paddle_sprites, False, pygame.sprite.collide_mask):   
+        # if paddle_sprite.rect.colliderect(self.rect):
+          if self.rect.right >= paddle_sprite.rect.left + 1 and self.old_rect.right <= paddle_sprite.rect.left + 1:
+            self.rect.right = paddle_sprite.rect.left
+            self.collided.x = 1
+          if self.rect.left <= paddle_sprite.rect.right and self.old_rect.left >= paddle_sprite.rect.right:
+            self.rect.left = paddle_sprite.rect.right
+            self.collided.x = 1
+          if self.rect.top < paddle_sprite.rect.bottom and self.old_rect.top > paddle_sprite.rect.bottom:
+            self.rect.top = paddle_sprite.rect.bottom
+            self.collided.y = 1
+          if self.rect.bottom > paddle_sprite.rect.top and self.old_rect.bottom < paddle_sprite.rect.top:
+            self.collided.y = 1
+            self.rect.bottom = paddle_sprite.rect.top
+          
