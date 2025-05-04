@@ -2,33 +2,35 @@ import pygame
 from config import *
 
 class Paddle(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, keys=0):
+    def __init__(self, pos, groups, ball, name, keys):
         super().__init__(groups)
         self.image = pygame.Surface((PADDLE_WIDTH, PADDLE_HEIGHT))
         self.image.fill(COLORS['paddle'])  # White color
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.speed = PADDLE_SPEED
-        self.keys = [
-            pygame.K_w,  # Up key
-            pygame.K_s,  # Down key
-        ] if keys == 0 else [
-            pygame.K_UP,  # Up key
-            pygame.K_DOWN,  # Down key
-        ]
+        self.ball = ball
+        self.name = name
+        self.keys = keys
+        self.score = 0
 
     def update(self, dt):
-        keys = pygame.key.get_pressed()
-        if keys[self.keys[0]]:
-            self.rect.y -= self.speed * dt
-        if keys[self.keys[1]]:
+        if self.keys is not None:
+          keys = pygame.key.get_pressed()
+          if keys[self.keys[0]]:
+              self.rect.y -= self.speed * dt
+          if keys[self.keys[1]]:
+              self.rect.y += self.speed * dt
+          # Keep the paddle within the screen bounds
+          if self.rect.top < 0:
+              self.rect.top = 0
+          if self.rect.bottom > SCREEN_HEIGHT:
+              self.rect.bottom = SCREEN_HEIGHT
+        else:
+          if self.rect.y < self.ball.rect.y:
             self.rect.y += self.speed * dt
-        # Keep the paddle within the screen bounds
-        if self.rect.top < 0:
-            self.rect.top = 0
-        if self.rect.bottom > SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-    
+          if self.rect.y > self.ball.rect.y:
+            self.rect.y -= self.speed * dt
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self, pos, groups, paddle_sprites):
@@ -67,9 +69,15 @@ class Ball(pygame.sprite.Sprite):
             self.collided.y = 1
         if self.rect.left < 0:
             self.rect.left = 0
+            for paddle_sprite in self.paddle_sprites:
+                if paddle_sprite.name == 'right':
+                    paddle_sprite.score += 1
             self.collided.x = 1
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
+            for paddle_sprite in self.paddle_sprites:
+                if paddle_sprite.name == 'left':
+                    paddle_sprite.score += 1
             self.collided.x = 1
     
     def bounce(self):
@@ -85,7 +93,7 @@ class Ball(pygame.sprite.Sprite):
       for paddle_sprite in self.paddle_sprites:
         if pygame.sprite.spritecollide(self, self.paddle_sprites, False, pygame.sprite.collide_mask):   
         # if paddle_sprite.rect.colliderect(self.rect):
-          if self.rect.right >= paddle_sprite.rect.left + 1 and self.old_rect.right <= paddle_sprite.rect.left + 1:
+          if self.rect.right >= paddle_sprite.rect.left and self.old_rect.right <= paddle_sprite.rect.left:
             self.rect.right = paddle_sprite.rect.left
             self.collided.x = 1
           if self.rect.left <= paddle_sprite.rect.right and self.old_rect.left >= paddle_sprite.rect.right:
