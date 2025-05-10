@@ -6,6 +6,7 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE, FPS, PLAYER_LAYER
 class Player(pygame.sprite.Sprite):
   def __init__(self, pos, groups, collition_sprites):
     super().__init__(groups)
+    self.frames = []
     self.state = 'down'
     self.frame_index = 0
     self.load_images()
@@ -78,8 +79,9 @@ class Player(pygame.sprite.Sprite):
     self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
 
   def collition(self, direction):
-    for sprite in self.collition_sprites:
-      if sprite.rect.colliderect(self.hit_box):
+    collitions = pygame.sprite.spritecollide(self, self.collition_sprites, False)
+    if collitions:
+      for sprite in collitions:
         if direction == "horizontal":
           if self.direction.x > 0:
             # self.rect.right = sprite.rect.left

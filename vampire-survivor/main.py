@@ -54,7 +54,7 @@ class Game:
 
     for sprite in map.get_layer_by_name("Entities"):
       if sprite.name == "Player":
-        self.player = Player( (sprite.x, sprite.y), self.all_sprites, self.collition_sprites)
+        self.player = Player((sprite.x, sprite.y), self.all_sprites, self.collition_sprites)
         self.player.rect = self.player.image.get_frect(center=(sprite.x, sprite.y))
         Gun(self.all_sprites, self.player, self.bullet_sprites, self.shoot_sound)
       if sprite.name == "Enemy":
