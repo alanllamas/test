@@ -82,6 +82,7 @@ class Game:
     def create_bullet(self, pos, direction):
       x = pos[0] + direction * 34 if direction == 1 else pos[0] + direction * 34 - self.bullet_image.get_width()
       Bullet((self.all_sprites, self.bullet_sprites), (x, pos[1]), self.bullet_image, direction)
+      Fire((self.all_sprites), pos,  self.fire_image, self.player)
 
 
     def create_bee(self):

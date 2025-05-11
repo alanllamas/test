@@ -77,13 +77,38 @@ class Worm(AnimatedSprite):
   #           self.rect.top = sprite.rect.bottom
   #         self.direction.y = 0
 
+class Fire(pygame.sprite.Sprite):
+  def __init__(self, groups, position, surf, player):
+    super().__init__(groups)
+    self.image = surf
+    self.player = player
+    self.rect = self.image.get_rect(topleft=position)
+    self.timer = Timer(100, autoStart = True, func = self.kill)
+    self.collidable = False
+    self.y_offset = pygame.Vector2(0,10)
+    self.x_offset = pygame.Vector2(30,0)
+
+    if self.player.flip:
+       self.rect.midright = self.player.rect.midleft + self.y_offset
+       self.image = pygame.transform.flip(self.image, True, False)
+    else:
+       self.rect.midright = self.player.rect.midright + self.y_offset + self.x_offset
+
+  def update(self, dt):
+      self.timer.update()
+
+      if self.player.flip:
+        self.rect.midright = self.player.rect.midleft + self.y_offset
+      else:
+        self.rect.midright = self.player.rect.midright + self.y_offset + self.x_offset
+  
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups, position, surf, direction):
       super().__init__(groups)
       self.image = surf
       self.rect = self.image.get_rect(topleft=position)
       self.direction = direction
-      self.speed = 0
+      self.speed = 300
       self.collidable = False
 
       self.image = pygame.transform.flip(self.image, direction == -1, False)
@@ -103,7 +128,7 @@ class Player(AnimatedSprite):
         self.pressed_keys = []
         self.can_jump = True
         self.flip = False
-        self.shoot_timer = Timer(500)
+        self.shoot_timer = Timer(300)
         self.create_bullet = create_bullet
 
     def update(self, dt):
