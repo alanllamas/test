@@ -46,6 +46,8 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.load_assets()
+        self.map_width = self.map.width * TILE_SIZE
+        self.map_height = self.map.height * TILE_SIZE
         self.set_timers()
         self.draw_sprites()
 
@@ -64,7 +66,7 @@ class Game:
         self.bullet_image = import_image("assets", "images", "gun", "bullet")
         self.fire_image = import_image("assets", "images", "gun", "fire")
         self.audio = import_audio()
-        print(self.audio)
+        # print(self.audio)
 
     def draw_sprites(self):
         for x, y, image in self.map.get_layer_by_name("Main").tiles():
@@ -72,12 +74,13 @@ class Game:
         
         for x, y, image in self.map.get_layer_by_name("Decoration").tiles():
           Tile((self.all_sprites, self.tile_sprites), (x, y), image)
-        
+
         for sprite in self.map.get_layer_by_name("Entities"):
           if sprite.name == 'Player':
             self.player = Player((self.all_sprites, self.player_sprites), (sprite.x, sprite.y), self.player_frames, self.collition_sprites, self.create_bullet)
           if sprite.name == 'Worm':
-            Worm((self.all_sprites, self.enemy_sprites), (sprite.x, sprite.y), self.worm_frames, self.collition_sprites)
+            print(sprite.height)
+            Worm((self.all_sprites, self.enemy_sprites), (sprite.x + 30, sprite.y + 36), self.worm_frames, sprite.width)
     
     def create_bullet(self, pos, direction):
       x = pos[0] + direction * 34 if direction == 1 else pos[0] + direction * 34 - self.bullet_image.get_width()
@@ -86,10 +89,10 @@ class Game:
 
 
     def create_bee(self):
-        print('create bee')
-        x = randint(200, 600)
-        y = randint(200, 600)
-        Bee((self.all_sprites, self.enemy_sprites), (x, y), self.bee_frames, self.collition_sprites)
+        # print('create bee')
+        x = self.map_width + SCREEN_WIDTH
+        y = randint(0, self.map_height)
+        Bee((self.all_sprites, self.enemy_sprites), (x, y), self.bee_frames)
        
     def update(self, dt):
         self.all_sprites.update(dt)

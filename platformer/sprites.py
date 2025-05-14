@@ -1,6 +1,8 @@
 import pygame
 from config import *
 from timers import *
+from math import sin
+from random import randint
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, groups, position, image):
@@ -24,15 +26,31 @@ class AnimatedSprite(pygame.sprite.Sprite):
     # get state
       self.frame_index += .8 * dt
       self.image = self.frames[int(self.frame_index) % len(self.frames)]
-
-class Bee(AnimatedSprite):
-  def __init__(self, groups, pos, frames, collition_sprites):
-      super().__init__(groups, pos, frames)
-      self.collition_sprites = collition_sprites
-      self.direction = pygame.Vector2()
   
-  def update(self, dt):
-     self.animate(dt)
+  def move(self):
+      pass
+
+class Enemy(AnimatedSprite):
+    def __init__(self, groups, pos, frames):
+      super().__init__(groups, pos, frames)
+
+    def update(self, dt):
+      self.move(dt)
+      self.animate(dt)
+               
+class Bee(Enemy):
+  def __init__(self, groups, pos, frames):
+      super().__init__(groups, pos, frames)
+      self.direction = pygame.Vector2()
+      self.speed = randint(100, 200)
+      self.amplitude = randint(100, 300)
+      self.frequency = randint(100, 300)
+  
+  def move(self, dt):
+    self.rect.x -= self.speed * dt
+    self.rect.y += sin(pygame.time.get_ticks() / self.frequency) * self.amplitude * dt
+  # def update(self, dt):
+  #    self.animate(dt)
     
   # def collition(self, direction):
   #   collitions = pygame.sprite.spritecollide(self, self.collition_sprites, False)
@@ -53,10 +71,12 @@ class Bee(AnimatedSprite):
   #         self.direction.y = 0
       
 class Worm(AnimatedSprite):
-  def __init__(self, groups, pos, frames, collition_sprites):
+  def __init__(self, groups, pos, frames, width):
       super().__init__(groups, pos, frames)
-      self.collition_sprites = collition_sprites
-      self.direction = pygame.Vector2()
+      self.flip = False
+      self.initial_position = pos.x
+      self.max_position = width
+      
   def update(self, dt):
      self.animate(dt)
   # def collition(self, direction):
