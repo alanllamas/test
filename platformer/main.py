@@ -51,8 +51,20 @@ class Game:
         self.set_timers()
         self.draw_sprites()
 
+    def collitions(self):
+       for bullet in self.bullet_sprites:
+          bullet_collition = pygame.sprite.spritecollide(bullet, self.enemy_sprites, False, pygame.sprite.collide_mask)
+          if bullet_collition:
+             self.audio['impact'].set_volume(.1)
+             self.audio['impact'].play()
+             bullet.kill()
+             for sprite in bullet_collition:
+                sprite.destroy()
+       if pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask):
+          self.running = False
+
     def set_timers(self):
-       self.bee_timer = Timer(200, self.create_bee, autoStart=True, repeat=True)
+       self.bee_timer = Timer(500, self.create_bee, autoStart=True, repeat=True)
 
     def play_audio(self, file_name, volume = .2):
         self.audio[file_name].set_volume(volume)
@@ -77,9 +89,9 @@ class Game:
 
         for sprite in self.map.get_layer_by_name("Entities"):
           if sprite.name == 'Player':
-            self.player = Player((self.all_sprites, self.player_sprites), (sprite.x, sprite.y), self.player_frames, self.collition_sprites, self.create_bullet)
+            self.player = Player((self.all_sprites, self.player_sprites), (sprite.x, sprite.y), self.player_frames, self.collition_sprites, self.create_bullet, self.audio['shoot'])
           if sprite.name == 'Worm':
-            print(sprite.height)
+            # print(sprite.height)
             Worm((self.all_sprites, self.enemy_sprites), (sprite.x + 30, sprite.y + 36), self.worm_frames, sprite.width)
     
     def create_bullet(self, pos, direction):
@@ -87,10 +99,10 @@ class Game:
       Bullet((self.all_sprites, self.bullet_sprites), (x, pos[1]), self.bullet_image, direction)
       Fire((self.all_sprites), pos,  self.fire_image, self.player)
 
-
     def create_bee(self):
         # print('create bee')
         x = self.map_width + SCREEN_WIDTH
+        # print(self.map_height)
         y = randint(0, self.map_height)
         Bee((self.all_sprites, self.enemy_sprites), (x, y), self.bee_frames)
        
@@ -98,10 +110,11 @@ class Game:
         self.all_sprites.update(dt)
         pygame.display.flip()
         self.bee_timer.update()
+        self.collitions()
         self.screen.fill((200, 200, 200))
 
     def run(self):
-        # self.play_audio('music')
+        self.play_audio('music')
         dt = self.clock.tick(FPS) / 1000
         while self.running:
             for event in pygame.event.get():
