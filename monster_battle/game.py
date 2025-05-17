@@ -5,7 +5,7 @@ from timers import *
 from sprites import *
 from random import *
 from ui import *
-
+from attack import AttackAnimationSprite
 
 class Game:
   def __init__(self):
@@ -69,8 +69,10 @@ class Game:
     attack_data = ABILITIES_DATA[attack]
     attack_type = attack_data['element']
     element_data = ELEMENT_DATA[attack_type]
-    # print(attack_data)
     damage = attack_data['damage']
+    animation = attack_data['animation']
+    print(self.attack_sprites[animation])
+    AttackAnimationSprite(target, self.attack_sprites[animation], self.all_sprites)
     element_multiplier = element_data[target.element]
     target.health -= damage *  element_multiplier 
     print(target.name)
@@ -83,6 +85,11 @@ class Game:
 
     elif state == 'attack':
        self.apply_attack(self.opponent_monster, data)
+
+    elif state == 'heal':
+      self.monster.health += 50
+      AttackAnimationSprite(self.monster, self.attack_sprites['green'], self.all_sprites)
+       
 
     self.player_active = False
     self.timers['player_end'].activate()
@@ -103,7 +110,8 @@ class Game:
     self.front_sprites = import_folder('assets', 'images', 'front')
     self.simple_sprites = import_folder('assets', 'images', 'simple')
     self.bg_surfs = import_folder('assets', 'images', 'other')
-    print(self.back_sprites)
+    self.attack_sprites = tile_importer(4, 'assets', 'images', 'attacks')
+    print(self.attack_sprites)
   
   def run(self):
     dt = self.clock.tick(FPS) / 1000
