@@ -19,10 +19,10 @@ class Game:
     self.clock = pygame.time.Clock()
     self.create_groups()
     self.load_assets()
-    player_monster_list = ['Ivieron', 'Gulfin', 'Atrox']
-    self.player_monsters =[ Monster(name, self.back_sprites[name]) for name in player_monster_list]
+    player_monster_list = ['Ivieron', 'Gulfin', 'Atrox', 'Friolera', 'Gulfin', 'Ivieron', 'Pluma']
+    self.player_monsters =[ Monster(name, self.back_sprites[name], self.simple_sprites[name]) for name in player_monster_list]
     self.monster = self.player_monsters[1]
-    self.ui = UI(self.monster)
+    self.ui = UI(self.monster, self.player_monsters)
 
     monster_choice = choice(list(MONSTER_DATA.keys()))
     self.opponent_monster = Opponent(monster_choice, self.front_sprites[monster_choice], self.opponent_sprites)
@@ -34,9 +34,9 @@ class Game:
     self.screen.blit(self.bg_surfs['bg'],(0,0))
 
   def draw(self):
-     self.ui.draw()
      self.draw_monster_floor()
      self.all_sprites.draw(self.screen)
+     self.ui.draw()
 
   def draw_monster_floor(self):
     for sprite in self.all_sprites:

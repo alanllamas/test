@@ -17,12 +17,15 @@ class Creature:
     )
 
 class Monster(pygame.sprite.Sprite, Creature):
-  def __init__(self, name, surf):
+  def __init__(self, name, back, simple):
     super().__init__()
-    self.image = surf
+    self.image = back
+    self.simple = simple
     self.rect = self.image.get_frect(bottomleft = (100, SCREEN_HEIGHT))
     self.get_data(name)
 
+  def __repr__(self):
+    return f'{self.name}: {self.health}/{self.max_health}'
   def update(self, dt):
     pass
 
