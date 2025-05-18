@@ -66,14 +66,16 @@ class Game:
       self.timers['opponent_end'].activate()
 
   def player_turn(self):
+    self.available_monsters = [monster for monster in self.player_monsters if monster != self.monster and not monster.health <= 0]
+
     self.player_active = True
     if self.monster.health <= 0:
-      if self.ui.available_monsters.__len__() <= 0:
+      if self.available_monsters.__len__() <= 0:
         self.running = False
       else:
         self.player_active = False
         self.monster.kill()
-        monster = choice(self.ui.available_monsters)
+        monster = choice(self.available_monsters)
         # monster_name = monster
         print('monster.name: ', monster.name)
         self.monster = monster
