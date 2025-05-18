@@ -40,11 +40,12 @@ class UI:
         self.state = 'general'
 
     elif self.state == 'switch': 
-      self.switch_index = (self.switch_index + int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])) % len(self.available_monsters)
-      if keys[pygame.K_SPACE]:
-        self.get_input(self.state, self.available_monsters[self.switch_index])
-        self.state = 'general'
-        # self.state = self.general_options[self.general_index['col'] + self.general_index['row'] * self.player_monsters]
+      if self.available_monsters:
+        self.switch_index = (self.switch_index + int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])) % len(self.available_monsters)
+        if keys[pygame.K_SPACE]:
+          self.get_input(self.state, self.available_monsters[self.switch_index])
+          self.state = 'general'
+          # self.state = self.general_options[self.general_index['col'] + self.general_index['row'] * self.player_monsters]
     elif self.state == 'heal':
         self.get_input('heal', self.monster)
         self.state = 'general'
@@ -57,6 +58,7 @@ class UI:
       self.general_index = { 'col': 0, 'row': 0 }
       self.attack_index = { 'col': 0, 'row': 0 }
       self.switch_index = 0
+  
   def generate_menu(self, cols, rows, index, options):
     rect = pygame.FRect(self.left + 40, self.top, 400, 200)
     pygame.draw.rect(self.screen, COLORS['white'], rect, 0, 4)
@@ -123,6 +125,7 @@ class UI:
 
   def update(self, dt):
     self.input()
+    self.available_monsters = [monster for monster in self.player_monsters if monster  != self.monster and monster.health > 0]
   
   def update_stats(self):
     self.stats()
