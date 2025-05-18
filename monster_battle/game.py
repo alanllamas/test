@@ -21,8 +21,9 @@ class Game:
     self.load_assets()
 
     player_monster_list = ['Ivieron', 'Gulfin', 'Atrox', 'Friolera', 'Cindrill', 'Pluma']
+    # player_monster_list = ['Pluma']
     self.player_monsters = [ Monster(name, self.back_sprites[name], self.simple_sprites[name]) for name in player_monster_list]
-    self.monster = self.player_monsters[1]
+    self.monster = self.player_monsters[0]
     monster_choice = choice(list(MONSTER_DATA.keys()))
     self.opponent_monster = Opponent(monster_choice, self.front_sprites[monster_choice], self.opponent_sprites)
     self.ui = UI(self.monster, self.player_monsters, self.get_input)

@@ -125,7 +125,7 @@ class UI:
 
   def update(self, dt):
     self.input()
-    self.available_monsters = [monster for monster in self.player_monsters if monster  != self.monster and monster.health > 0]
+    self.available_monsters = [monster for monster in self.player_monsters if monster  != self.monster and not monster.health <= 0]
   
   def update_stats(self):
     self.stats()
